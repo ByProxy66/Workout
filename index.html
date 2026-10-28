@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Træningsåret</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E6EAEC; --surface:#F5F7F8; --ink:#1C2830; --muted:#5D6B74; --line:#C6CED3;
+  --akk:#4E8A68; --trans:#C2862A; --real:#B0433A; --deload:#97A4AD; --test:#3C5A96;
+  --focus:#1C2830;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#151C21; --surface:#1E272D; --ink:#E7ECEF; --muted:#9AA8B1; --line:#33414A;
+    --akk:#6BAE88; --trans:#E0A64A; --real:#D9665C; --deload:#6F7E88; --test:#7C9BE0;
+    --focus:#E7ECEF; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151C21; --surface:#1E272D; --ink:#E7ECEF; --muted:#9AA8B1; --line:#33414A;
+  --akk:#6BAE88; --trans:#E0A64A; --real:#D9665C; --deload:#6F7E88; --test:#7C9BE0;
+  --focus:#E7ECEF; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.5;-webkit-text-size-adjust:100%}
+main{max-width:760px;margin:0 auto;padding:20px 18px 48px}
+h1,h2,.big{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif}
+h2{font-size:1.5rem;font-weight:600;margin:44px 0 12px;letter-spacing:.01em}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+/* Hero */
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.top h1{font-size:1.15rem;font-weight:600;margin:0;color:var(--muted)}
+.hero{margin-top:14px;padding:22px 20px 20px;background:var(--surface);border-left:10px solid var(--phase,var(--trans));border-radius:4px 14px 14px 4px}
+.hero .big{font-size:clamp(2.8rem,12vw,4.6rem);font-weight:700;line-height:.92;margin:0;letter-spacing:-.005em}
+.hero .week{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.6rem;font-weight:600;margin:8px 0 2px}
+.hero .dates{color:var(--muted);margin-bottom:16px}
+.pips{display:flex;gap:6px;margin:10px 0 4px}
+.pips span{width:28px;height:8px;border-radius:4px;background:var(--line)}
+.pips span.on{background:var(--phase)}
+.pips span.now{background:var(--phase);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--phase)}
+dl.rx{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:14px 0 0}
+dl.rx dt{color:var(--muted)}
+dl.rx dd{margin:0;font-weight:500}
+.note{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.next{margin-top:12px;color:var(--muted)}
+.back{margin-top:14px;background:none;border:1.5px solid var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer}
+
+/* Year grid */
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.92rem;color:var(--muted);margin-bottom:14px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.row{display:grid;grid-template-columns:62px 1fr;align-items:center;gap:10px;margin-bottom:8px}
+.row b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:600;font-size:1.05rem}
+.cells{display:grid;grid-template-columns:repeat(15,1fr);gap:4px}
+.cell{aspect-ratio:1;border:0;border-radius:4px;padding:0;cursor:pointer;background:var(--c);position:relative}
+.cell.past{opacity:.35}
+.cell.today{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.cell.sel{outline:3px solid var(--ink);outline-offset:1px}
+
+/* Phase list */
+ol.phases{list-style:none;padding:0;margin:0}
+ol.phases li{display:grid;grid-template-columns:10px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+ol.phases li .bar{width:10px;height:100%;min-height:28px;border-radius:3px;background:var(--c)}
+ol.phases li.done{color:var(--muted)}
+ol.phases li.cur .name{font-weight:600}
+ol.phases .when{color:var(--muted);font-size:.92rem;text-align:right;white-space:nowrap}
+
+/* Tests */
+.form{display:grid;grid-template-columns:1.4fr 1fr .8fr auto;gap:8px;align-items:end}
+.form label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:4px}
+input,select{background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0;width:100%}
+.btn{background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600}
+.tablewrap{overflow-x:auto;margin-top:16px}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:500}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.del{background:none;border:0;color:var(--muted);cursor:pointer;padding:2px 6px;font-size:1.1rem}
+.chart{margin-top:18px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.empty{padding:16px;border:1.5px dashed var(--line);border-radius:10px;color:var(--muted);margin-top:14px}
+
+/* Day program */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.tab{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab.today::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--phase,var(--trans));margin-left:6px;vertical-align:2px}
+.cardio{padding:10px 14px;border-radius:10px;background:var(--surface);margin-bottom:10px;color:var(--muted)}
+ul.ex{list-style:none;padding:0;margin:0}
+ul.ex li{padding:12px 0;border-bottom:1px solid var(--line)}
+.exhead{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.exname{font-weight:600}
+.exname small{font-weight:400;color:var(--muted);margin-left:6px}
+.target{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.35rem;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.exmeta{display:flex;justify-content:space-between;gap:12px;font-size:.92rem;color:var(--muted);margin-top:2px}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line);margin-right:6px;color:var(--muted)}
+.tag.main{border-color:var(--phase,var(--trans));color:var(--ink)}
+.link{background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:.92rem}
+.edit{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px;align-items:end}
+.edit label{display:flex;flex-direction:column;font-size:.8rem;color:var(--muted);gap:3px}
+.msg{color:var(--real);font-size:.92rem;margin-top:8px;min-height:1em}
+.rest{padding:20px;border:1.5px dashed var(--line);border-radius:10px;color:var(--muted)}
+
+/* Settings */
+details{margin-top:44px;background:var(--surface);border-radius:12px;padding:4px 18px}
+summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:1.35rem;font-weight:600;padding:12px 0}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding-bottom:18px}
+.set label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:4px}
+.set .wide{grid-column:1/-1}
+.why{font-size:.95rem;color:var(--muted);padding-bottom:16px;max-width:62ch}
+.status{font-size:.85rem;color:var(--muted)}
+
+@media (max-width:520px){
+  .row{grid-template-columns:1fr;gap:4px}
+  .form{grid-template-columns:1fr 1fr}
+  .form .btn{grid-column:1/-1}
+  dl.rx{grid-template-columns:1fr;gap:0}
+  dl.rx dd{margin-bottom:8px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .hero{animation:in .45s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><h1>Træningsåret</h1><span class="status" id="status"></span></div>
+
+  <section class="hero" id="hero" aria-live="polite"></section>
+
+  <h2>Dagens træning</h2>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="day"></div>
+  <p class="muted" style="font-size:.92rem;margin-top:12px">Vægtene er forslag, regnet ud fra dit seneste sæt og fasen. Rund til nærmeste vægt, maskinen eller håndvægtene har, og juster efter dagsform. Tunge basisøvelser følger fasen, isolationsøvelserne bliver i deres rep-interval hele året.</p>
+
+  <h2>Året</h2>
+  <div class="legend" id="legend"></div>
+  <div id="grid"></div>
+  <p class="muted" style="font-size:.92rem;margin-top:10px">Tryk på en uge for at se, hvad den indeholder.</p>
+
+  <h2>Faserne</h2>
+  <ol class="phases" id="phases"></ol>
+
+  <h2>Testresultater</h2>
+  <p class="muted">Log dit tungeste sæt i testugen. Estimeret 1RM regnes ud med Epleys formel, så du ikke behøver at tage en ægte maks. En test opdaterer også øvelsens udgangspunkt i programmet.</p>
+  <div class="form">
+    <label>Øvelse<select id="tLift"></select></label>
+    <label>Kg<input id="tKg" type="number" inputmode="decimal" min="0" step="0.5" placeholder="100"></label>
+    <label>Reps<input id="tReps" type="number" inputmode="numeric" min="1" max="12" step="1" placeholder="3"></label>
+    <button class="btn" id="tAdd">Gem test</button>
+  </div>
+  <p class="msg" id="tMsg" role="status"></p>
+  <div id="tests"></div>
+
+  <details id="settings">
+    <summary>Indstillinger</summary>
+    <p class="why">Med 60 år på bagen anbefaler jeg en deload efter hver fase frem for kun én pr. blok. Det giver hyppigere restitution uden at du taber fremdrift. Vælg 2 ugers deload, hvis du stadig føler dig træt efter én uge.</p>
+    <div class="set">
+      <label class="wide">Startdato for Blok 1 (første uge af nuværende Transmutation)<input id="sStart" type="date"></label>
+      <label>Akkumulering, uger<select id="sAkk"></select></label>
+      <label>Transmutation, uger<select id="sTrans"></select></label>
+      <label>Realisering, uger<select id="sReal"></select></label>
+      <label>Deload, uger<select id="sDeload"><option value="1">1 uge</option><option value="2">2 uger</option></select></label>
+    </div>
+    <p class="why" style="margin-top:8px"><b>Flyt data mellem enheder.</b> Kopiér dine data her, og sæt dem ind i feltet på den anden enhed eller den anden udgave af værktøjet.</p>
+    <div class="set">
+      <label class="wide">Data<textarea id="xData" rows="4" style="background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;font-size:.85rem;color:inherit;width:100%"></textarea></label>
+      <button class="btn" id="xCopy" type="button">Kopiér mine data</button>
+      <button class="btn" id="xLoad" type="button">Indlæs data fra feltet</button>
+      <p class="msg wide" id="xMsg" role="status" style="color:var(--muted)"></p>
+    </div>
+  </details>
+</main>
+
+<script>
+(function(){
+  const KEY = "traeningsaaret:v1";
+  const PROGRAM = [
+    {day:1, name:"Mandag", items:[
+      {id:"dbsp", n:"Dumbbell seated shoulder press", m:"Skuldre", kg:20, r:11, main:true, min:5},
+      {id:"smithcp", n:"Smith machine bench press", m:"Bryst", kg:89, r:6, main:true, min:3},
+      {id:"mrow", n:"Dumbbell incline bench row", m:"Ryg", kg:null, r:null, lo:8, hi:12},
+      {id:"rope", n:"Cable rope high pulley triceps extension", m:"Triceps", kg:24.5, r:14},
+      {id:"lat", n:"Dumbbell lateral raise", m:"Sideskuldre", kg:12, r:13}]},
+    {day:2, name:"Tirsdag", cardio:"Efter styrken: 45 min gang på løbebånd, ca. 6 km/t og 5 % stigning", items:[
+      {id:"legpress", n:"Leg press machine", m:"Ben, fødderne højt og bredt", kg:120, r:12, main:true, min:5},
+      {id:"legcurl", n:"Leg curl", m:"Baglår", kg:null, r:null, lo:10, hi:15}]},
+    {day:3, name:"Onsdag", items:[
+      {id:"pulldown", n:"Cable lat pulldown (wide grip)", m:"Ryg", kg:77, r:12, main:true, min:5},
+      {id:"row", n:"Cable seated row", m:"Ryg, sid oprejst", kg:38.5, r:8, main:true, min:5},
+      {id:"pullup", n:"Pull-up (hammer grip) med elastik", m:"Ryg", kg:0, r:10, bw:true},
+      {id:"shrug", n:"Dumbbell shoulder shrug", m:"Trapezius", kg:20, r:12},
+      {id:"hammer", n:"Dumbbell hammer curl", m:"Biceps, let og langsomt ned", kg:null, r:null, lo:12, hi:20}]},
+    {day:4, name:"Torsdag", cardio:"Efter styrken: 45 min gang på løbebånd, ca. 6 km/t og 5 % stigning", items:[
+      {id:"hipthrust", n:"Hip thrust / glute bridge", m:"Baller, svaj ikke i lænden", kg:null, r:null, lo:10, hi:15},
+      {id:"abduction", n:"Hip abduction machine", m:"Hofter", kg:null, r:null, lo:15, hi:20}]},
+    {day:5, name:"Fredag", items:[
+      {id:"incdb", n:"Dumbbell incline bench press", m:"Øvre bryst", kg:32.5, r:11, main:true, min:5},
+      {id:"machsp", n:"Machine shoulder press", m:"Skuldre", kg:27.5, r:12, main:true, min:3},
+      {id:"pushdown", n:"Cable triceps pushdown (V-bar)", m:"Triceps", kg:35, r:15},
+      {id:"facepull", n:"Cable rope face pull", m:"Bagside skuldre", kg:null, r:null, lo:12, hi:20}]}
+  ];
+  const DEFAULT = {
+    settings:{start:"2026-10-12", akk:4, trans:4, real:2, deload:1},
+    base:{}, tests:[]
+  };
+  PROGRAM.forEach(d=>d.items.forEach(it=>{ if(!it.same) DEFAULT.base[it.id] = {kg:it.kg, r:it.r}; }));
+  const ITEMS = {}; PROGRAM.forEach(d=>d.items.forEach(it=>{ if(!it.same) ITEMS[it.id]=it; }));
+  const MAIN = Object.values(ITEMS).filter(it=>it.main);
+  const PH = {
+    akk:{name:"Akkumulering", c:"var(--akk)", sets:"3–4 sæt × 8–12 reps", load:"ca. 65–75 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Muskelmasse og arbejdskapacitet. Volumen bygges op uge for uge."},
+    trans:{name:"Transmutation", c:"var(--trans)", sets:"3–5 sæt × 4–6 reps", load:"ca. 75–85 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Den nye muskelmasse omsættes til styrke. Tungere hver uge, lidt færre assistance-sæt."},
+    real:{name:"Realisering", c:"var(--real)", sets:"3–4 sæt × 2–4 reps", load:"ca. 85–90 % af 1RM", rpe:"RPE 8, 2 reps i reserve", focus:"Tungt og lav volumen. Tunge treere frem for singler skåner led og sener."},
+    deload:{name:"Deload", c:"var(--deload)", sets:"Halvdelen af sættene, samme reps", load:"ca. 60 % af 1RM", rpe:"RPE 5–6, let og hurtigt", focus:"Samme øvelser, halv volumen. Her henter kroppen de sidste ugers træning hjem."},
+    test:{name:"Testuge", c:"var(--test)", sets:"Arbejd op til et tungt sæt à 3–5 reps", load:"Ud fra dagsform", rpe:"RPE 9, stop før teknikken knækker", focus:"Test hovedløftene og log resultatet under Testresultater. Resten af ugen holdes let."}
+  };
+  const LIFT_COLORS = ["var(--akk)","var(--real)","var(--test)","var(--trans)","var(--muted)","var(--ink)","#8A6BB0","#2F8F8F"];
+
+  let state = load();
+  let selected = null;
+  let db = null, docRef = null, saveTimer = null;
+
+  function load(){
+    try{ const s = JSON.parse(localStorage.getItem(KEY)); if(s && s.settings) return merge(s); }catch(e){}
+    return JSON.parse(JSON.stringify(DEFAULT));
+  }
+  function merge(s){
+    const d = JSON.parse(JSON.stringify(DEFAULT));
+    return {settings:Object.assign(d.settings, s.settings||{}), base:Object.assign(d.base, s.base||{}), tests:Array.isArray(s.tests)?s.tests:[]};
+  }
+  function save(){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+    if(docRef){
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=>{
+        docRef.set({settings:state.settings, base:state.base, tests:state.tests, updated:new Date().toISOString()})
+          .then(()=>setStatus("Gemt"))
+          .catch(()=>setStatus("Gemt på denne enhed"));
+      }, 600);
+    }
+  }
+  function setStatus(t){ document.getElementById("status").textContent = t; }
+
+  // Dates
+  const DAY = 864e5;
+  function parseDate(s){ const [y,m,d] = s.split("-").map(Number); return new Date(y,m-1,d); }
+  function addDays(d,n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+  function fmt(d){ return d.toLocaleDateString("da-DK",{day:"numeric",month:"short"}).replace(/\.$/,""); }
+  function fmtY(d){ return d.toLocaleDateString("da-DK",{day:"numeric",month:"short",year:"numeric"}); }
+  function todayIndex(start){
+    const t = new Date(); t.setHours(0,0,0,0);
+    const days = Math.round((t - start)/DAY);
+    return Math.floor(days/7);
+  }
+
+  // Plan
+  function buildPlan(){
+    const s = state.settings, seq = [];
+    const push = (p,n,b)=>{ for(let i=0;i<n;i++) seq.push({p,i,n,b}); };
+    push("trans",s.trans,1); push("deload",s.deload,1); push("real",s.real,1); push("test",1,1);
+    let b = 2;
+    while(seq.length < 52){
+      push("akk",s.akk,b); push("deload",s.deload,b); push("trans",s.trans,b);
+      push("deload",s.deload,b); push("real",s.real,b); push("test",1,b); b++;
+    }
+    seq.length = 52;
+    const start = parseDate(s.start);
+    seq.forEach((w,k)=>{ w.k = k; w.date = addDays(start, 7*k); });
+    // Mark truncated final phase
+    const last = seq[51]; const cut = seq.filter(w=>w.b===last.b && w.p===last.p && w.date>=addDays(last.date,-7*last.i));
+    if(cut.length < last.n) cut.forEach(w=>w.n = cut.length);
+    return seq;
+  }
+  function phaseRuns(plan){
+    const runs = [];
+    plan.forEach(w=>{
+      const r = runs[runs.length-1];
+      if(r && r.p===w.p && r.b===w.b && w.i>0) r.weeks.push(w);
+      else runs.push({p:w.p,b:w.b,weeks:[w]});
+    });
+    return runs;
+  }
+  function weekNote(w){
+    if(w.p==="deload") return w.n>1 ? (w.i===0 ? "Første deload-uge: skru helt ned." : "Anden deload-uge: let, men byg lidt op mod næste fase.") : "Én let uge. Gå fra træningen med energi tilbage.";
+    if(w.p==="test") return "Varm grundigt op. Én tung top-set pr. løft er nok.";
+    if(w.i===0) return "Første uge i fasen. Start i den lette ende af intervallet og find rytmen.";
+    if(w.i===w.n-1) return "Sidste uge i fasen og den tungeste. Hold teknikken, før du jagter kiloene.";
+    return "Læg 1–2,5 kg på overkropsløft og 2,5–5 kg på benløft, hvis sidste uge føltes kontrolleret.";
+  }
+
+  // Render
+  function render(){
+    const plan = buildPlan();
+    const start = parseDate(state.settings.start);
+    const ti = todayIndex(start);
+    renderHero(plan, ti);
+    renderDay(plan, ti);
+    renderGrid(plan, ti);
+    renderPhases(plan, ti);
+    renderTests();
+  }
+
+  function renderHero(plan, ti){
+    const el = document.getElementById("hero");
+    const idx = selected!==null ? selected : ti;
+    if(idx < 0 && selected===null){
+      const s = parseDate(state.settings.start);
+      el.style.setProperty("--phase", PH.trans.c);
+      el.innerHTML = `<p class="big">Snart i gang</p><p class="week">Planen starter ${fmtY(s)}</p><p class="dates">Første fase er Transmutation.</p>`;
+      return;
+    }
+    if(idx > 51){
+      el.style.setProperty("--phase", PH.test.c);
+      el.innerHTML = `<p class="big">Året er gået</p><p class="week">52 uger er gennemført</p><p class="dates">Sæt en ny startdato under Indstillinger for at planlægge næste år.</p>`;
+      return;
+    }
+    const w = plan[idx], ph = PH[w.p];
+    const end = addDays(w.date, 6);
+    const pips = Array.from({length:w.n},(_,i)=>`<span class="${i<w.i?'on':''}${i===w.i?' now':''}"></span>`).join("");
+    const nxt = plan.slice(idx+1).find(x=>x.i===0);
+    const label = selected!==null && selected!==ti ? (idx<ti ? "Tidligere uge" : "Kommende uge") : "Denne uge";
+    el.style.setProperty("--phase", ph.c);
+    el.innerHTML = `
+      <p class="muted" style="margin:0 0 6px">${label}, blok ${w.b}</p>
+      <p class="big">${ph.name}</p>
+      <p class="week">Uge ${w.i+1} af ${w.n}</p>
+      <div class="pips" aria-hidden="true">${pips}</div>
+      <p class="dates">${fmt(w.date)} til ${fmt(end)}</p>
+      <dl class="rx">
+        <dt>Sæt og reps</dt><dd>${ph.sets}</dd>
+        <dt>Belastning</dt><dd>${ph.load}</dd>
+        <dt>Indsats</dt><dd>${ph.rpe}</dd>
+      </dl>
+      <p class="note">${ph.focus} ${weekNote(w)}</p>
+      ${nxt?`<p class="next">Næste fase: ${PH[nxt.p].name} fra ${fmt(nxt.date)}.</p>`:""}
+      ${selected!==null && selected!==ti?`<button class="back" id="back">Tilbage til denne uge</button>`:""}`;
+    const b = document.getElementById("back");
+    if(b) b.onclick = ()=>{ selected=null; render(); };
+  }
+
+  let dayTab = (()=>{ const d = new Date().getDay(); return d; })();
+  let editing = null;
+  function r25(x){ return Math.max(0, Math.round(x/2.5)*2.5); }
+  function kgs(x){ return String(x).replace(".",","); }
+  function e1(it){ const b = state.base[it.id]; return e1rm(b.kg, b.r); }
+  function rirFor(w){ if(w.n<=1) return 2; if(w.i===0) return 3; if(w.i===w.n-1) return 1; return 2; }
+  function targetFor(it, w){
+    const b = state.base[it.id];
+    if(it.bw){
+      const sets = {akk:"3",trans:"3",real:"2",deload:"1–2",test:"2"}[w.p];
+      return {t:`${sets} × ${w.p==="deload"?"6–8":"8–12"}`, note:"Når du klarer 12 i alle sæt, skift til en tyndere elastik."};
+    }
+    if(!it.main){
+      const lo = it.lo || (b.r>=15?15:b.r>=10?10:8), hi = it.hi || (lo===15?20:lo===10?15:12);
+      const sets = {akk:"3",trans:"3",real:"2",deload:"1–2",test:"2"}[w.p];
+      const reps = w.p==="deload" ? `${lo}` : `${lo}–${hi}`;
+      if(!b.kg) return {t:`${sets} × ${reps}`, note:`Find en vægt, hvor du klarer ${lo} reps med 2–3 i reserve, og gem den med Opdater.`};
+      return {t:`${sets} × ${reps} @ ${kgs(b.kg)} kg`, note: w.p==="deload" ? "Let, langt fra udmattelse." : `Når du når ${hi} reps i alle sæt, læg vægt på.`};
+    }
+    const e = e1(it), rir = rirFor(w);
+    let reps, sets, kg, note;
+    if(w.p==="akk"){ reps=10; sets="3–4"; kg=e/(1+(reps+rir)/30); note=`${rir} reps i reserve.`; }
+    else if(w.p==="trans"){ reps=Math.max(5,it.min); sets="4"; kg=e/(1+(reps+rir)/30); note=`${rir} reps i reserve.`; }
+    else if(w.p==="real"){ reps=Math.max(3,it.min); sets="3"; kg=e/(1+(reps+rir)/30); note=`${rir} reps i reserve. Stop sættet, hvis farten falder markant.`; }
+    else if(w.p==="deload"){ reps=8; sets="2"; kg=e/(1+(reps+4)/30); note="Let og hurtigt, ca. 4 reps i reserve."; }
+    else { reps=Math.max(3,it.min); sets="Top-sæt"; kg=e/(1+(reps+1)/30); note=`Arbejd op mod ca. ${kgs(r25(kg))} kg × ${reps}–${reps+2}, og log sættet under Testresultater.`;
+      return {t:`${reps}–${reps+2} reps`, note, est:e}; }
+    return {t:`${sets} × ${reps} @ ${kgs(r25(kg))} kg`, note, est:e};
+  }
+
+  function renderDay(plan, ti){
+    const idx = selected!==null ? selected : ti;
+    const w = plan[Math.min(51, Math.max(0, idx))];
+    const hero = document.getElementById("hero");
+    const tabs = [[1,"Man"],[2,"Tir"],[3,"Ons"],[4,"Tor"],[5,"Fre"],[6,"Weekend"]];
+    const todayD = new Date().getDay();
+    const cur = dayTab===0 ? 6 : dayTab;
+    const tb = document.getElementById("tabs");
+    tb.style.setProperty("--phase", PH[w.p].c);
+    tb.innerHTML = tabs.map(([d,l])=>`<button class="tab${(d===todayD || (d===6&&todayD===0))?' today':''}" role="tab" aria-selected="${d===cur}" data-d="${d}">${l}</button>`).join("");
+    tb.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ dayTab=+b.dataset.d; editing=null; renderDay(plan, ti); });
+    const box = document.getElementById("day");
+    box.style.setProperty("--phase", PH[w.p].c);
+    const day = PROGRAM.find(d=>d.day===cur);
+    if(!day){ box.innerHTML = `<div class="rest">Hviledag. En gåtur tæller, men lad vægtene hvile.</div>`; return; }
+    let html = day.cardio ? `<div class="cardio">${day.cardio}</div>` : "";
+    html += `<ul class="ex">` + day.items.map(raw=>{
+      const it = raw.same ? ITEMS[raw.id] : raw;
+      const b = state.base[it.id], t = targetFor(it, w);
+      const last = it.bw ? `Seneste: ${b.r} reps` : (!b.kg ? "Ingen startvægt endnu" : `Seneste: ${kgs(b.kg)} kg × ${b.r}`);
+      const ed = editing===it.id+"@"+cur;
+      return `<li>
+        <div class="exhead"><span class="exname">${esc(it.n)}<small>${esc(it.m)}</small></span><span class="target">${t.t}</span></div>
+        <div class="exmeta"><span><span class="tag${it.main?' main':''}">${it.main?'Følger fasen':'Fast interval'}</span>${t.note}</span></div>
+        <div class="exmeta"><span>${last}${t.est?`, est. 1RM ${kgs(t.est.toFixed(1))} kg`:""}</span><button class="link" data-edit="${it.id}">${ed?'Luk':'Opdater'}</button></div>
+        ${ed?`<div class="edit">
+          ${it.bw?'':`<label>Kg<input type="number" inputmode="decimal" step="0.5" min="0" id="eKg" value="${b.kg??''}"></label>`}
+          <label>Reps<input type="number" inputmode="numeric" min="1" max="30" id="eR" value="${b.r??''}"></label>
+          <button class="btn" data-save="${it.id}">Gem sæt</button></div><p class="msg" id="eMsg"></p>`:""}
+      </li>`;
+    }).join("") + `</ul>`;
+    box.innerHTML = html;
+    box.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{ const k=b.dataset.edit+"@"+cur; editing = editing===k?null:k; renderDay(plan, ti); });
+    box.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>{
+      const id = b.dataset.save, it = ITEMS[id];
+      const kgEl = document.getElementById("eKg");
+      const kg = it.bw ? 0 : parseFloat(String(kgEl.value).replace(",","."));
+      const r = parseInt(document.getElementById("eR").value,10);
+      if((!it.bw && !(kg>0)) || !(r>=1 && r<=30)){ document.getElementById("eMsg").textContent = "Skriv en vægt over 0 og mellem 1 og 30 reps."; return; }
+      state.base[id] = {kg, r}; editing=null; save(); render();
+    });
+  }
+
+  function renderGrid(plan, ti){
+    const lg = document.getElementById("legend");
+    lg.innerHTML = ["akk","trans","real","deload","test"].map(p=>`<span><i style="background:${PH[p].c}"></i>${PH[p].name}</span>`).join("");
+    const blocks = {};
+    plan.forEach(w=>{ (blocks[w.b] = blocks[w.b]||[]).push(w); });
+    const cols = Math.max(...Object.values(blocks).map(a=>a.length));
+    const g = document.getElementById("grid");
+    g.innerHTML = Object.keys(blocks).map(b=>`
+      <div class="row"><b>Blok ${b}</b>
+        <div class="cells" style="grid-template-columns:repeat(${cols},1fr)">
+          ${blocks[b].map(w=>`<button class="cell${w.k<ti?' past':''}${w.k===ti?' today':''}${w.k===selected?' sel':''}" style="--c:${PH[w.p].c}" data-k="${w.k}" aria-label="Uge ${w.k+1}, ${fmt(w.date)}: ${PH[w.p].name}, uge ${w.i+1} af ${w.n}${w.k===ti?' (denne uge)':''}"></button>`).join("")}
+        </div>
+      </div>`).join("");
+    g.querySelectorAll(".cell").forEach(c=>c.onclick=()=>{
+      const k = +c.dataset.k; selected = (k===ti)?null:k; render();
+      document.getElementById("hero").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+    });
+  }
+
+  function renderPhases(plan, ti){
+    const runs = phaseRuns(plan);
+    document.getElementById("phases").innerHTML = runs.map(r=>{
+      const f = r.weeks[0], l = r.weeks[r.weeks.length-1];
+      const done = l.k < ti, cur = f.k<=ti && ti<=l.k;
+      const n = r.weeks.length;
+      return `<li class="${done?'done':''}${cur?' cur':''}"><span class="bar" style="--c:${PH[r.p].c}"></span>
+        <span class="name">${PH[r.p].name}${cur?' (nu)':''} <span class="muted">, blok ${r.b}, ${n} ${n===1?'uge':'uger'}</span></span>
+        <span class="when">${fmt(f.date)} til ${fmt(addDays(l.date,6))}</span></li>`;
+    }).join("");
+  }
+
+  function e1rm(kg,reps){ return reps===1 ? kg : kg*(1+reps/30); }
+
+  function renderTests(){
+    const sel = document.getElementById("tLift");
+    const prev = sel.value;
+    sel.innerHTML = MAIN.map(it=>`<option value="${it.id}">${esc(it.n)}</option>`).join("");
+    if(ITEMS[prev]) sel.value = prev;
+    const box = document.getElementById("tests");
+    const tests = state.tests.slice().sort((a,b)=>a.date<b.date?1:-1);
+    if(!tests.length){
+      box.innerHTML = `<div class="empty">Ingen tests endnu. Din første testuge ligger sidst i Blok 1. Log dit tungeste sæt for hvert hovedløft her.</div>`;
+      return;
+    }
+    const rows = tests.map(t=>`<tr><td>${fmtY(parseDate(t.date))}</td><td>${esc(ITEMS[t.lift]?ITEMS[t.lift].n:t.lift)}</td><td class="num">${t.kg} kg × ${t.reps}</td><td class="num"><b>${e1rm(t.kg,t.reps).toFixed(1)} kg</b></td><td><button class="del" data-id="${t.id}" aria-label="Slet test">Slet</button></td></tr>`).join("");
+    box.innerHTML = `<div class="chart">${chart()}</div><div class="tablewrap"><table><thead><tr><th>Dato</th><th>Øvelse</th><th class="num">Sæt</th><th class="num">Est. 1RM</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    box.querySelectorAll(".del").forEach(b=>b.onclick=()=>{
+      if(b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Slet?"; b.style.color="var(--real)"; return; }
+      state.tests = state.tests.filter(t=>t.id!==b.dataset.id); save(); renderTests();
+    });
+  }
+
+  function chart(){
+    const byLift = {};
+    state.tests.forEach(t=>{ (byLift[t.lift]=byLift[t.lift]||[]).push({d:parseDate(t.date), v:e1rm(t.kg,t.reps)}); });
+    const all = state.tests.map(t=>({d:parseDate(t.date), v:e1rm(t.kg,t.reps)}));
+    if(all.length < 2) return "";
+    const W=640,H=300,P={l:44,r:14,t:14,b:28};
+    const minD = Math.min(...all.map(p=>+p.d)), maxD = Math.max(...all.map(p=>+p.d)) || minD+1;
+    const plotTop = 14+16*3; let minV = Math.min(...all.map(p=>p.v)), maxV = Math.max(...all.map(p=>p.v));
+    const pad = Math.max(5,(maxV-minV)*.1); minV = Math.max(0,minV-pad); maxV += pad;
+    const x = d => P.l + (maxD===minD?0.5:(d-minD)/(maxD-minD))*(W-P.l-P.r);
+    const y = v => H-P.b - (v-minV)/(maxV-minV)*(H-plotTop-P.b);
+    let out = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimeret 1RM over tid">`;
+    for(let i=0;i<=3;i++){ const v = minV+(maxV-minV)*i/3, yy=y(v);
+      out += `<line x1="${P.l}" x2="${W-P.r}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${P.l-6}" y="${yy+4}" text-anchor="end" font-size="11" fill="var(--muted)">${Math.round(v)}</text>`; }
+    out += `<text x="${P.l}" y="${H-8}" font-size="11" fill="var(--muted)">${fmt(new Date(minD))}</text><text x="${W-P.r}" y="${H-8}" font-size="11" text-anchor="end" fill="var(--muted)">${fmt(new Date(maxD))}</text>`;
+    const names = MAIN.map(it=>it.id).concat(Object.keys(byLift).filter(l=>!ITEMS[l]));
+    let lx = P.l+4, legRow = 0;
+    names.forEach((l,i)=>{
+      const pts = (byLift[l]||[]).sort((a,b)=>a.d-b.d); if(!pts.length) return;
+      const c = LIFT_COLORS[i%LIFT_COLORS.length];
+      const lbl = ITEMS[l]?ITEMS[l].n:l; if(lx + 24 + lbl.length*6 > W-P.r){ lx = P.l+4; legRow++; }
+      out += `<polyline fill="none" stroke="${c}" stroke-width="2.5" points="${pts.map(p=>x(+p.d)+","+y(p.v)).join(" ")}"/>`;
+      pts.forEach(p=> out += `<circle cx="${x(+p.d)}" cy="${y(p.v)}" r="4" fill="${c}"/>`);
+      out += `<rect x="${lx}" y="${P.t-2+legRow*16}" width="10" height="10" rx="2" fill="${c}"/><text x="${lx+14}" y="${P.t+7+legRow*16}" font-size="12" fill="var(--ink)">${esc(ITEMS[l]?ITEMS[l].n:l)}</text>`;
+      lx += 24 + (ITEMS[l]?ITEMS[l].n:l).length*6;
+    });
+    return out + "</svg>";
+  }
+
+  function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // Tests form
+  document.getElementById("tAdd").onclick = ()=>{
+    const kg = parseFloat(document.getElementById("tKg").value.replace(",","."));
+    const reps = parseInt(document.getElementById("tReps").value,10);
+    const lift = document.getElementById("tLift").value;
+    const msg = document.getElementById("tMsg");
+    if(!(kg>0) || !(reps>=1 && reps<=12)){ msg.textContent = "Skriv vægt i kg og et antal reps mellem 1 og 12."; return; }
+    msg.textContent = "";
+    state.base[lift] = {kg, r:reps};
+    const d = new Date();
+    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    state.tests.push({id:Date.now().toString(36), lift, kg, reps, date:iso});
+    document.getElementById("tKg").value = ""; document.getElementById("tReps").value = "";
+    save(); render();
+  };
+
+  // Settings
+  function fillSettings(){
+    const s = state.settings;
+    const opts = (el,a,b)=>{ el.innerHTML = Array.from({length:b-a+1},(_,i)=>`<option value="${a+i}">${a+i} uger</option>`).join(""); };
+    opts(document.getElementById("sAkk"),3,6);
+    opts(document.getElementById("sTrans"),3,6);
+    opts(document.getElementById("sReal"),1,4);
+    document.getElementById("sStart").value = s.start;
+    document.getElementById("sAkk").value = s.akk;
+    document.getElementById("sTrans").value = s.trans;
+    document.getElementById("sReal").value = s.real;
+    document.getElementById("sDeload").value = s.deload;
+  }
+  function readSettings(){
+    const s = state.settings;
+    const st = document.getElementById("sStart").value; if(st) s.start = st;
+    s.akk = +document.getElementById("sAkk").value;
+    s.trans = +document.getElementById("sTrans").value;
+    s.real = +document.getElementById("sReal").value;
+    s.deload = +document.getElementById("sDeload").value;
+    selected = null; save(); render();
+  }
+  ["sStart","sAkk","sTrans","sReal","sDeload"].forEach(id=>document.getElementById(id).addEventListener("change", readSettings));
+
+  document.getElementById("xCopy").onclick = async ()=>{
+    const ta = document.getElementById("xData"), m = document.getElementById("xMsg");
+    ta.value = JSON.stringify({settings:state.settings, base:state.base, tests:state.tests});
+    ta.select();
+    try{ await navigator.clipboard.writeText(ta.value); m.textContent = "Kopieret. Sæt det ind i feltet på den anden enhed."; }
+    catch(e){ m.textContent = "Teksten er markeret i feltet. Kopiér den manuelt."; }
+  };
+  document.getElementById("xLoad").onclick = ()=>{
+    const m = document.getElementById("xMsg");
+    try{
+      const d = JSON.parse(document.getElementById("xData").value);
+      if(!d || !d.settings) throw 0;
+      state = merge(d); selected = null; save(); fillSettings(); render();
+      m.textContent = "Data indlæst.";
+    }catch(e){ m.textContent = "Feltet indeholder ikke gyldige data. Kopiér dem igen fra den anden enhed."; }
+  };
+
+  fillSettings();
+  render();
+  if(!window.claude) setStatus("Gemt på denne enhed");
+
+  // Sync across devices when available
+  (async ()=>{
+    try{
+      if(!window.claude || !window.claude.use) return;
+      const [d, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+      if(!d || !user) return;
+      const id = await user.id(); if(!id) return;
+      db = d;
+      const ref = db.collection("data/users/"+id).doc("plan");
+      const snap = await ref.get();
+      if(snap.exists){
+        state = merge(snap.data());
+        try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+        fillSettings(); render();
+      }
+      docRef = ref;
+      if(!snap.exists) save();
+      setStatus("Synkroniseret");
+    }catch(e){ setStatus("Gemt på denne enhed"); }
+  })();
+})();
+</script>
+</body>
+</html>
