@@ -377,8 +377,15 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     else if(w.p==="real"){ reps=Math.max(3,it.min); sets="3"; kg=e/(1+(reps+rir)/30); note=`${rir} reps i reserve. Stop sættet, hvis farten falder markant.`; }
     else if(w.p==="deload"){ reps=8; sets="2"; kg=e/(1+(reps+4)/30); note="Let og hurtigt, ca. 4 reps i reserve."; }
     else { reps=Math.max(3,it.min); sets="Top-sæt"; kg=e/(1+(reps+1)/30); note=`Arbejd op mod ca. ${kgs(r25(kg))} kg × ${reps}–${reps+2}, og log sættet under Testresultater.`;
-      return {t:`${reps}–${reps+2} reps`, note, est:e}; }
-    return {t:`${sets} × ${reps} @ ${kgs(r25(kg))} kg`, note, est:e};
+      return {t:`${reps}–${reps+2} reps`, note, est:e, wk:r25(kg)}; }
+    return {t:`${sets} × ${reps} @ ${kgs(r25(kg))} kg`, note, est:e, wk:r25(kg)};
+  }
+
+  function warm(kg,p){
+    const steps = p==="akk" ? [[.6,8]] : p==="deload" ? [] : p==="trans" ? [[.5,8],[.7,4]] : [[.5,8],[.7,4],[.85,2]];
+    if(!steps.length) return "Ikke nødvendig, første sæt er let nok.";
+    const words = steps.length===1 ? ["1 sæt"] : steps.length===2 ? ["først","så"] : ["først","så","til sidst"];
+    return steps.map(([f,r],i)=>`${words[i]} ${kgs(r25(kg*f))} kg × ${r} reps`).join(", ") + ". Derefter arbejdssættene.";
   }
 
   function renderDay(plan, ti){
@@ -405,6 +412,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       return `<li>
         <div class="exhead"><span class="exname">${esc(it.n)}<small>${esc(it.m)}</small></span><span class="target">${t.t}</span></div>
         <div class="exmeta"><span><span class="tag${it.main?' main':''}">${it.main?'Følger fasen':'Fast interval'}</span>${t.note}</span></div>
+        ${t.wk?`<div class="exmeta"><span>Opvarmning: ${warm(t.wk,w.p)}</span></div>`:""}
         <div class="exmeta"><span>${last}${t.est?`, est. 1RM ${kgs(t.est.toFixed(1))} kg`:""}</span><button class="link" data-edit="${it.id}">${ed?'Luk':'Opdater'}</button></div>
         ${ed?`<div class="edit">
           ${it.bw?'':`<label>Kg<input type="number" inputmode="decimal" step="0.5" min="0" id="eKg" value="${b.kg??''}"></label>`}
