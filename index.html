@@ -175,6 +175,11 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       <label>Realisering, uger<select id="sReal"></select></label>
       <label>Deload, uger<select id="sDeload"><option value="1">1 uge</option><option value="2">2 uger</option></select></label>
     </div>
+    <p class="why" style="margin-top:8px"><b>Hent fra Jefit.</b> Eksportér dine data på jefit.com under Settings, Data Controls og Export Data, og vælg filen her. Værktøjet finder dit seneste og tungeste sæt for hver øvelse. Brug filen direkte, uden at åbne den i et regneark først.</p>
+    <div class="set">
+      <label class="wide">Jefit-fil (.csv)<input type="file" id="jFile" accept=".csv,text/csv,text/plain"></label>
+      <p class="msg wide" id="jMsg" role="status" style="color:var(--muted)"></p>
+    </div>
     <p class="why" style="margin-top:8px"><b>Flyt data mellem enheder.</b> Kopiér dine data her, og sæt dem ind i feltet på den anden enhed eller den anden udgave af værktøjet.</p>
     <div class="set">
       <label class="wide">Data<textarea id="xData" rows="4" style="background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;font:inherit;font-size:.85rem;color:inherit;width:100%"></textarea></label>
@@ -190,20 +195,20 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   const KEY = "traeningsaaret:v1";
   const PROGRAM = [
     {day:1, name:"Mandag", items:[
-      {id:"dbsp", n:"Dumbbell seated shoulder press", m:"Skuldre", kg:20, r:11, main:true, min:5},
+      {id:"dbsp", n:"Dumbbell seated shoulder press", m:"Skuldre", kg:20, r:12, main:true, min:5},
       {id:"smithcp", n:"Smith machine bench press", m:"Bryst", kg:89, r:6, main:true, min:3},
       {id:"mrow", n:"Dumbbell incline bench row", m:"Ryg", kg:null, r:null, lo:8, hi:12},
-      {id:"rope", n:"Cable rope high pulley triceps extension", m:"Triceps", kg:24.5, r:14},
+      {id:"rope", n:"Cable rope high pulley triceps extension", m:"Triceps", kg:28, r:10},
       {id:"lat", n:"Dumbbell lateral raise", m:"Sideskuldre", kg:12, r:13}]},
     {day:2, name:"Tirsdag", cardio:"Efter styrken: 45 min gang på løbebånd, ca. 6 km/t og 5 % stigning", items:[
-      {id:"legpress", n:"Leg press machine", m:"Ben, fødderne højt og bredt", kg:120, r:12, main:true, min:5},
+      {id:"legpress", n:"Leg press machine", m:"Ben, fødderne højt og bredt", kg:125, r:12, main:true, min:5},
       {id:"legcurl", n:"Leg curl", m:"Baglår", kg:null, r:null, lo:10, hi:15}]},
     {day:3, name:"Onsdag", items:[
-      {id:"pulldown", n:"Cable lat pulldown (wide grip)", m:"Ryg", kg:77, r:12, main:true, min:5},
-      {id:"row", n:"Cable seated row", m:"Ryg, sid oprejst", kg:38.5, r:8, main:true, min:5},
+      {id:"pulldown", n:"Cable lat pulldown (wide grip)", m:"Ryg", kg:87, r:6, main:true, min:5},
+      {id:"row", n:"Cable seated row", m:"Ryg, sid oprejst", kg:43.5, r:6, main:true, min:5},
       {id:"pullup", n:"Pull-up (hammer grip) med elastik", m:"Ryg", kg:0, r:10, bw:true},
-      {id:"shrug", n:"Dumbbell shoulder shrug", m:"Trapezius", kg:20, r:12},
-      {id:"hammer", n:"Dumbbell hammer curl", m:"Biceps, let og langsomt ned", kg:null, r:null, lo:12, hi:20}]},
+      {id:"shrug", n:"Dumbbell shoulder shrug", m:"Trapezius", kg:35, r:15},
+      {id:"hammer", n:"Dumbbell hammer curl", m:"Biceps, let og langsomt ned", kg:14, r:10, lo:12, hi:20}]},
     {day:4, name:"Torsdag", cardio:"Efter styrken: 45 min gang på løbebånd, ca. 6 km/t og 5 % stigning", items:[
       {id:"deadlift", n:"Deadlift", m:"Neutral ryg, stop før formen går", kg:null, r:null, main:true, min:6, care:true},
       {id:"smithsquat", n:"Smith machine squat", m:"Fødderne lidt frem, dybde efter knæene", kg:null, r:null, main:true, min:6, care:true}]},
@@ -429,7 +434,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       const kg = it.bw ? 0 : parseFloat(String(kgEl.value).replace(",","."));
       const r = parseInt(document.getElementById("eR").value,10);
       if((!it.bw && !(kg>0)) || !(r>=1 && r<=30)){ document.getElementById("eMsg").textContent = "Skriv en vægt over 0 og mellem 1 og 30 reps."; return; }
-      state.base[id] = {kg, r}; editing=null; save(); render();
+      state.base[id] = {kg, r, d:todayISO()}; editing=null; save(); render();
     });
   }
 
@@ -526,7 +531,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     const msg = document.getElementById("tMsg");
     if(!(kg>0) || !(reps>=1 && reps<=12)){ msg.textContent = "Skriv vægt i kg og et antal reps mellem 1 og 12."; return; }
     msg.textContent = "";
-    state.base[lift] = {kg, r:reps};
+    state.base[lift] = {kg, r:reps, d:todayISO()};
     const d = new Date();
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     state.tests.push({id:Date.now().toString(36), lift, kg, reps, date:iso});
@@ -558,6 +563,89 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   }
   ["sStart","sAkk","sTrans","sReal","sDeload"].forEach(id=>document.getElementById(id).addEventListener("change", readSettings));
 
+  // Jefit-import
+  const JEFIT = {
+    "dumbbell seated shoulder press":"dbsp", "smith machine bench press":"smithcp",
+    "cable rope high pulley tricep extension":"rope", "dumbbell lateral raise":"lat",
+    "dumbbell incline bench row":"mrow", "machine leg press":"legpress",
+    "cable lat pulldown (wide grip)":"pulldown", "cable seated row":"row",
+    "pull-up (hammer grip)":"pullup", "dumbbell shoulder shrug":"shrug", "dumbbell hammer curl":"hammer",
+    "dumbbell incline bench press":"incdb", "machine shoulder press":"machsp",
+    "cable tricep pushdown (v-bar)":"pushdown", "cable rope face pull":"facepull"
+  };
+  function todayISO(off){ const d = new Date(); d.setDate(d.getDate()+(off||0)); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+  function jefitId(name){
+    const n = String(name).trim().toLowerCase().replace(/\s+/g," ");
+    if(JEFIT[n]) return JEFIT[n];
+    if(/leg curl/.test(n)) return "legcurl";
+    if(/smith.*squat/.test(n)) return "smithsquat";
+    if(/deadlift/.test(n) && !/romanian|stiff/.test(n)) return "deadlift";
+    return null;
+  }
+  function parseCSV(text){
+    const rows = []; let row = [], f = "", q = false;
+    for(let i=0;i<text.length;i++){
+      const c = text[i];
+      if(q){ if(c==='"'){ if(text[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=c; }
+      else if(c==='"') q = true;
+      else if(c===","){ row.push(f); f=""; }
+      else if(c==="\n" || c==="\r"){ if(c==="\r" && text[i+1]==="\n") i++; row.push(f); f=""; if(row.length>1 || row[0]!=="") rows.push(row); row=[]; }
+      else f += c;
+    }
+    if(f!=="" || row.length){ row.push(f); rows.push(row); }
+    return rows;
+  }
+  function importJefit(text){
+    const lines = text.split(/\r?\n/);
+    const s = lines.findIndex(l=>l.startsWith("### EXERCISE LOGS"));
+    if(s<0) throw new Error("nosection");
+    let e = s+1; while(e<lines.length && !lines[e].startsWith("#")) e++;
+    const rows = parseCSV(lines.slice(s+1,e).join("\n"));
+    const head = rows.shift() || [];
+    const iN = head.indexOf("ename"), iD = head.indexOf("mydate"), iL = head.indexOf("logs");
+    if(iN<0 || iD<0 || iL<0) throw new Error("columns");
+    const cutoff = todayISO(-60), latest = {}, unknown = new Set();
+    rows.forEach(r=>{
+      const name = (r[iN]||"").trim(), d = r[iD]||"";
+      if(d < cutoff) return;
+      const sets = (r[iL]||"").split(",").map(x=>{ const m = x.match(/^\s*([\d.]+)x(\d+)/); return m ? {kg:+m[1], r:+m[2]} : null; }).filter(x=>x && x.r>0 && x.r<=50);
+      if(!sets.length) return;
+      const id = jefitId(name);
+      if(!id || !ITEMS[id]){ unknown.add(name); return; }
+      const bw = !!ITEMS[id].bw;
+      let best;
+      if(bw) best = sets.reduce((a,b)=>b.r>a.r?b:a);
+      else { const w = sets.filter(x=>x.kg>0); if(!w.length) return; best = w.reduce((a,b)=>e1rm(b.kg,b.r)>e1rm(a.kg,a.r)?b:a); }
+      const v = {d, kg: bw ? 0 : Math.round(best.kg*2)/2, r: best.r};
+      const cur = latest[id];
+      if(!cur || d>cur.d || (d===cur.d && (bw ? v.r>cur.r : e1rm(v.kg,v.r)>e1rm(cur.kg,cur.r)))) latest[id] = v;
+    });
+    const changed = [], kept = [];
+    Object.entries(latest).forEach(([id,v])=>{
+      const b = state.base[id];
+      if(b && b.d && b.d>v.d){ kept.push(ITEMS[id].n); return; }
+      if(b && b.d===v.d && b.kg===v.kg && b.r===v.r) return;
+      state.base[id] = {kg:v.kg, r:v.r, d:v.d};
+      changed.push(`${esc(ITEMS[id].n)}: ${ITEMS[id].bw ? v.r+" reps" : kgs(v.kg)+" kg × "+v.r} (${fmt(parseDate(v.d))})`);
+    });
+    let out = changed.length ? `<b>Opdateret ud fra Jefit:</b><br>${changed.join("<br>")}` : "Ingen nye sæt i filen. Dine tal var allerede opdaterede.";
+    if(kept.length) out += `<br><br>Beholdt, fordi du har gemt nyere tal her: ${kept.map(esc).join(", ")}.`;
+    if(unknown.size) out += `<br><br>Ikke genkendt fra de seneste 60 dage: ${[...unknown].map(esc).join(", ")}.`;
+    return out;
+  }
+  document.getElementById("jFile").onchange = ev=>{
+    const file = ev.target.files && ev.target.files[0], m = document.getElementById("jMsg");
+    if(!file) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{
+      try{ m.innerHTML = importJefit(String(rd.result)); save(); render(); }
+      catch(err){ m.textContent = "Filen kunne ikke læses som en Jefit-eksport. Brug filen direkte fra Jefit, uden at åbne den i et regneark først."; }
+      ev.target.value = "";
+    };
+    rd.onerror = ()=>{ m.textContent = "Filen kunne ikke åbnes. Prøv igen."; };
+    rd.readAsText(file);
+  };
+
   document.getElementById("xCopy").onclick = async ()=>{
     const ta = document.getElementById("xData"), m = document.getElementById("xMsg");
     ta.value = JSON.stringify({settings:state.settings, base:state.base, tests:state.tests});
@@ -580,7 +668,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   if(!window.claude) setStatus("Gemt på denne enhed");
 
   // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
-  const VERSION = "2026-10-29-1";
+  const VERSION = "2026-10-29-2";
   function checkUpdate(){
     if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
     fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
