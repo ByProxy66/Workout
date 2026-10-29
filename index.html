@@ -227,7 +227,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   const MAIN = Object.values(ITEMS).filter(it=>it.main);
   const PH = {
     akk:{name:"Akkumulering", c:"var(--akk)", sets:"3–4 sæt × 8–12 reps", load:"ca. 65–75 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Muskelmasse og arbejdskapacitet. Volumen bygges op uge for uge."},
-    trans:{name:"Transmutation", c:"var(--trans)", sets:"3–5 sæt × 4–6 reps", load:"ca. 75–85 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Den nye muskelmasse omsættes til styrke. Tungere hver uge, lidt færre assistance-sæt."},
+    trans:{name:"Transmutation", c:"var(--trans)", sets:"3–5 sæt × 4–6 reps", load:"ca. 75–85 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Den nye muskelmasse omsættes til styrke. Tungere hver uge, og assistanceøvelserne går fra 4 til 3 sæt."},
     real:{name:"Realisering", c:"var(--real)", sets:"3–4 sæt × 2–4 reps", load:"ca. 85–90 % af 1RM", rpe:"RPE 8, 2 reps i reserve", focus:"Tungt og lav volumen. Tunge treere frem for singler skåner led og sener."},
     deload:{name:"Deload", c:"var(--deload)", sets:"Halvdelen af sættene, samme reps", load:"ca. 60 % af 1RM", rpe:"RPE 5–6, let og hurtigt", focus:"Samme øvelser, halv volumen. Her henter kroppen de sidste ugers træning hjem."},
     test:{name:"Testuge", c:"var(--test)", sets:"Arbejd op til et tungt sæt à 3–5 reps", load:"Ud fra dagsform", rpe:"RPE 9, stop før teknikken knækker", focus:"Test hovedløftene og log resultatet under Testresultater. Resten af ugen holdes let."}
@@ -365,12 +365,12 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   function targetFor(it, w){
     const b = state.base[it.id];
     if(it.bw){
-      const sets = {akk:"3",trans:"3",real:"2",deload:"1–2",test:"2"}[w.p];
+      const sets = {akk:"4",trans:"3",real:"2",deload:"1–2",test:"2"}[w.p];
       return {t:`${sets} × ${w.p==="deload"?"6–8":"8–12"}`, note:"Når du klarer 12 i alle sæt, skift til en tyndere elastik."};
     }
     if(!it.main){
       const lo = it.lo || (b.r>=15?15:b.r>=10?10:8), hi = it.hi || (lo===15?20:lo===10?15:12);
-      const sets = {akk:"3",trans:"3",real:"2",deload:"1–2",test:"2"}[w.p];
+      const sets = {akk:"4",trans:"3",real:"2",deload:"1–2",test:"2"}[w.p];
       const reps = w.p==="deload" ? `${lo}` : `${lo}–${hi}`;
       if(!b.kg) return {t:`${sets} × ${reps}`, note:`Find en vægt, hvor du klarer ${lo} reps med 2–3 i reserve, og gem den med Opdater.`};
       return {t:`${sets} × ${reps} @ ${kgs(b.kg)} kg`, note: w.p==="deload" ? "Let, langt fra udmattelse." : `Når du når ${hi} reps i alle sæt, læg vægt på.`};
@@ -668,7 +668,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   if(!window.claude) setStatus("Gemt på denne enhed");
 
   // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
-  const VERSION = "2026-10-29-2";
+  const VERSION = "2026-10-29-3";
   function checkUpdate(){
     if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
     fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
