@@ -155,7 +155,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   <ol class="phases" id="phases"></ol>
 
   <h2>Testresultater</h2>
-  <p class="muted">Log dit tungeste sæt i testugen. Estimeret 1RM regnes ud med Epleys formel, så du ikke behøver at tage en ægte maks. En test opdaterer også øvelsens udgangspunkt i programmet.</p>
+  <p class="muted">Log dit tungeste sæt i testugen. Estimeret 1RM regnes ud med Epleys formel, så du ikke behøver at tage en ægte maks. En test opdaterer også øvelsens udgangspunkt i programmet. Listen viser basisøvelserne, grupperet efter dag, og starter på den dag, du har valgt under Dagens træning. Isolationsøvelser testes ikke, de styres af rep-intervallet.</p>
   <div class="form">
     <label>Øvelse<select id="tLift"></select></label>
     <label>Kg<input id="tKg" type="number" inputmode="decimal" min="0" step="0.5" placeholder="100"></label>
@@ -205,8 +205,8 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       {id:"shrug", n:"Dumbbell shoulder shrug", m:"Trapezius", kg:20, r:12},
       {id:"hammer", n:"Dumbbell hammer curl", m:"Biceps, let og langsomt ned", kg:null, r:null, lo:12, hi:20}]},
     {day:4, name:"Torsdag", cardio:"Efter styrken: 45 min gang på løbebånd, ca. 6 km/t og 5 % stigning", items:[
-      {id:"hipthrust", n:"Hip thrust / glute bridge", m:"Baller, svaj ikke i lænden", kg:null, r:null, lo:10, hi:15},
-      {id:"abduction", n:"Hip abduction machine", m:"Hofter", kg:null, r:null, lo:15, hi:20}]},
+      {id:"deadlift", n:"Deadlift", m:"Neutral ryg, stop før formen går", kg:null, r:null, main:true, min:6, care:true},
+      {id:"smithsquat", n:"Smith machine squat", m:"Fødderne lidt frem, dybde efter knæene", kg:null, r:null, main:true, min:6, care:true}]},
     {day:5, name:"Fredag", items:[
       {id:"incdb", n:"Dumbbell incline bench press", m:"Øvre bryst", kg:32.5, r:11, main:true, min:5},
       {id:"machsp", n:"Machine shoulder press", m:"Skuldre", kg:27.5, r:12, main:true, min:3},
@@ -352,7 +352,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   }
 
   let dayTab = (()=>{ const d = new Date().getDay(); return d; })();
-  let editing = null;
+  let editing = null, testPicked = false;
   function r25(x){ return Math.max(0, Math.round(x/2.5)*2.5); }
   function kgs(x){ return String(x).replace(".",","); }
   function e1(it){ const b = state.base[it.id]; return e1rm(b.kg, b.r); }
@@ -370,7 +370,8 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       if(!b.kg) return {t:`${sets} × ${reps}`, note:`Find en vægt, hvor du klarer ${lo} reps med 2–3 i reserve, og gem den med Opdater.`};
       return {t:`${sets} × ${reps} @ ${kgs(b.kg)} kg`, note: w.p==="deload" ? "Let, langt fra udmattelse." : `Når du når ${hi} reps i alle sæt, læg vægt på.`};
     }
-    const e = e1(it), rir = rirFor(w);
+    if(!b.kg) return {t:"Find startvægt", note:"Start let: en vægt, du kan løfte 10 gange med mindst 3 reps i reserve. Gem den med Opdater."};
+    const e = e1(it), rir = rirFor(w) + (it.care?1:0);
     let reps, sets, kg, note;
     if(w.p==="akk"){ reps=10; sets="3–4"; kg=e/(1+(reps+rir)/30); note=`${rir} reps i reserve.`; }
     else if(w.p==="trans"){ reps=Math.max(5,it.min); sets="4"; kg=e/(1+(reps+rir)/30); note=`${rir} reps i reserve.`; }
@@ -398,7 +399,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     const tb = document.getElementById("tabs");
     tb.style.setProperty("--phase", PH[w.p].c);
     tb.innerHTML = tabs.map(([d,l])=>`<button class="tab${(d===todayD || (d===6&&todayD===0))?' today':''}" role="tab" aria-selected="${d===cur}" data-d="${d}">${l}</button>`).join("");
-    tb.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ dayTab=+b.dataset.d; editing=null; renderDay(plan, ti); });
+    tb.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{ dayTab=+b.dataset.d; editing=null; testPicked=false; renderDay(plan, ti); renderTests(); });
     const box = document.getElementById("day");
     box.style.setProperty("--phase", PH[w.p].c);
     const day = PROGRAM.find(d=>d.day===cur);
@@ -468,8 +469,10 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   function renderTests(){
     const sel = document.getElementById("tLift");
     const prev = sel.value;
-    sel.innerHTML = MAIN.map(it=>`<option value="${it.id}">${esc(it.n)}</option>`).join("");
-    if(ITEMS[prev]) sel.value = prev;
+    sel.innerHTML = PROGRAM.filter(d=>d.items.some(i=>i.main && !i.same)).map(d=>`<optgroup label="${d.name}">${d.items.filter(i=>i.main && !i.same).map(it=>`<option value="${it.id}">${esc(it.n)}</option>`).join("")}</optgroup>`).join("");
+    const todayFirst = ((PROGRAM.find(d=>d.day===(dayTab===0?6:dayTab))||{items:[]}).items).find(i=>i.main && !i.same);
+    if(testPicked && ITEMS[prev]) sel.value = prev; else if(todayFirst) sel.value = todayFirst.id;
+    sel.onchange = ()=>{ testPicked = true; };
     const box = document.getElementById("tests");
     const tests = state.tests.slice().sort((a,b)=>a.date<b.date?1:-1);
     if(!tests.length){
