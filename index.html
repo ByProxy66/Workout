@@ -579,6 +579,24 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   render();
   if(!window.claude) setStatus("Gemt på denne enhed");
 
+  // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
+  const VERSION = "2026-10-29-1";
+  function checkUpdate(){
+    if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
+    fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
+      const m = t.match(/const VERSION = "([^"]+)"/);
+      if(!m || m[1]===VERSION || document.getElementById("upd")) return;
+      const b = document.createElement("button");
+      b.id = "upd"; b.className = "btn"; b.type = "button";
+      b.textContent = "Ny version klar. Tryk for at opdatere";
+      b.style.cssText = "display:block;width:100%;margin:12px 0 0";
+      b.onclick = ()=>location.replace(location.pathname + "?v=" + encodeURIComponent(m[1]));
+      document.querySelector(".top").after(b);
+    }).catch(()=>{});
+  }
+  checkUpdate();
+  document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") checkUpdate(); });
+
   // Sync across devices when available
   (async ()=>{
     try{
