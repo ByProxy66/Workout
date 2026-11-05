@@ -175,6 +175,10 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       <label>Realisering, uger<select id="sReal"></select></label>
       <label>Deload, uger<select id="sDeload"><option value="1">1 uge</option><option value="2">2 uger</option></select></label>
     </div>
+    <div id="updBox">
+      <p class="why" style="margin-top:8px"><b>Opdatering.</b> Du kører version <span id="verTxt"></span>. Tryk her, hvis du har lagt en ny fil på GitHub. Dine data bliver liggende.</p>
+      <div class="set"><button class="btn" id="forceUpd" type="button">Hent nyeste version</button></div>
+    </div>
     <p class="why" style="margin-top:8px"><b>Hent fra Jefit.</b> Eksportér dine data på jefit.com under Settings, Data Controls og Export Data, og vælg filen her. Værktøjet finder dit seneste og tungeste sæt for hver øvelse. Brug filen direkte, uden at åbne den i et regneark først.</p>
     <div class="set">
       <label class="wide">Jefit-fil (.csv)<input type="file" id="jFile" accept=".csv,text/csv,text/plain"></label>
@@ -675,7 +679,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   if(!window.claude) setStatus("Gemt på denne enhed");
 
   // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
-  const VERSION = "2026-10-29-5";
+  const VERSION = "2026-10-29-6";
   function checkUpdate(){
     if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
     fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
@@ -690,6 +694,9 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     }).catch(()=>{});
   }
   checkUpdate();
+  document.getElementById("verTxt").textContent = VERSION;
+  if(/github\.io$/.test(location.hostname)) document.getElementById("forceUpd").onclick = ()=>location.replace(location.pathname + "?v=" + Date.now());
+  else document.getElementById("updBox").style.display = "none";
   document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") checkUpdate(); });
 
   // Sync across devices when available
