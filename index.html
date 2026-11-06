@@ -217,7 +217,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
       {id:"deadlift", n:"Trap bar deadlift", m:"Høje håndtag til at starte med, neutral ryg", kg:null, r:null, main:true, min:6, care:true},
       {id:"smithsquat", n:"Smith machine squat", m:"Fødderne lidt frem, dybde efter knæene", kg:null, r:null, main:true, min:6, care:true}]},
     {day:5, name:"Fredag", items:[
-      {id:"incdb", n:"Dumbbell incline bench press", m:"Øvre bryst", kg:32.5, r:11, main:true, min:5},
+      {id:"smithinc", n:"Smith machine incline bench press", m:"Øvre bryst", kg:null, r:null, main:true, min:3},
       {id:"machsp", n:"Machine shoulder press", m:"Skuldre", kg:27.5, r:12, main:true, min:3},
       {id:"pushdown", n:"Cable triceps pushdown (V-bar)", m:"Triceps", kg:35, r:15},
       {id:"facepull", n:"Cable rope face pull", m:"Bagside skuldre", kg:null, r:null, lo:12, hi:20}]}
@@ -584,7 +584,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     "dumbbell incline bench row":"mrow", "machine leg press":"legpress",
     "cable lat pulldown (wide grip)":"pulldown", "cable seated row":"row",
     "pull-up (hammer grip)":"pullup", "dumbbell hammer curl":"hammer",
-    "dumbbell incline bench press":"incdb", "machine shoulder press":"machsp",
+    "smith machine incline bench press":"smithinc", "machine shoulder press":"machsp",
     "cable tricep pushdown (v-bar)":"pushdown", "cable rope face pull":"facepull"
   };
   function todayISO(off){ const d = new Date(); d.setDate(d.getDate()+(off||0)); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
@@ -593,6 +593,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     if(JEFIT[n]) return JEFIT[n];
     if(/farmer/.test(n)) return "farmer";
     if(/leg curl/.test(n)) return "legcurl";
+    if(/smith.*incline/.test(n)) return "smithinc";
     if(/smith.*squat/.test(n)) return "smithsquat";
     if(/deadlift/.test(n) && !/romanian|stiff/.test(n)) return "deadlift";
     return null;
@@ -684,7 +685,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   if(!window.claude) setStatus(loadInfo || "Ingen gemte data fundet");
 
   // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
-  const VERSION = "2026-10-29-7";
+  const VERSION = "2026-10-29-8";
   function checkUpdate(){
     if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
     fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
