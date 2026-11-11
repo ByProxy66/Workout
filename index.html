@@ -402,7 +402,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   }
 
   function warm(kg,p){
-    const steps = p==="akk" ? [[.6,8]] : p==="deload" ? [] : p==="trans" ? [[.5,8],[.7,4]] : [[.5,8],[.7,4],[.85,2]];
+    const steps = (p==="akk" || p==="deload") ? [[.6,8]] : p==="trans" ? [[.5,8],[.7,4]] : [[.5,8],[.7,4],[.85,2]];
     if(!steps.length) return "Ikke nødvendig, første sæt er let nok.";
     const words = steps.length===1 ? ["1 sæt"] : steps.length===2 ? ["først","så"] : ["først","så","til sidst"];
     return steps.map(([f,r],i)=>`${words[i]} ${kgs(r25(kg*f))} kg × ${r} reps`).join(", ") + ". Derefter arbejdssættene.";
@@ -685,7 +685,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   if(!window.claude) setStatus(loadInfo || "Ingen gemte data fundet");
 
   // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
-  const VERSION = "2026-10-29-8";
+  const VERSION = "2026-10-29-9";
   function checkUpdate(){
     if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
     fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
