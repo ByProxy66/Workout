@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Træningsåret</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Træningsåret">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231C2830'/><rect x='5' y='17' width='4.5' height='9' rx='1' fill='%234E8A68'/><rect x='11' y='13' width='4.5' height='13' rx='1' fill='%23C2862A'/><rect x='17' y='9' width='4.5' height='17' rx='1' fill='%23B0433A'/><rect x='23' y='5' width='4.5' height='21' rx='1' fill='%233C5A96'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -169,10 +172,10 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     <summary>Indstillinger</summary>
     <p class="why">Med 60 år på bagen anbefaler jeg en deload efter hver fase frem for kun én pr. blok. Det giver hyppigere restitution uden at du taber fremdrift. Vælg 2 ugers deload, hvis du stadig føler dig træt efter én uge.</p>
     <div class="set">
-      <label class="wide">Startdato for Blok 1 (første uge af nuværende Transmutation)<input id="sStart" type="date"></label>
-      <label>Akkumulering, uger<select id="sAkk"></select></label>
-      <label>Transmutation, uger<select id="sTrans"></select></label>
-      <label>Realisering, uger<select id="sReal"></select></label>
+      <label class="wide">Startdato for Blok 1 (første uge af den nuværende Styrke-fase)<input id="sStart" type="date"></label>
+      <label>Opbygning, uger<select id="sAkk"></select></label>
+      <label>Styrke, uger<select id="sTrans"></select></label>
+      <label>Tungt, uger<select id="sReal"></select></label>
       <label>Deload, uger<select id="sDeload"><option value="1">1 uge</option><option value="2">2 uger</option></select></label>
     </div>
     <div id="updBox">
@@ -230,9 +233,9 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   const ITEMS = {}; PROGRAM.forEach(d=>d.items.forEach(it=>{ if(!it.same) ITEMS[it.id]=it; }));
   const MAIN = Object.values(ITEMS).filter(it=>it.main);
   const PH = {
-    akk:{name:"Akkumulering", c:"var(--akk)", sets:"3–4 sæt × 8–12 reps", load:"ca. 65–75 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Muskelmasse og arbejdskapacitet. Volumen bygges op uge for uge."},
-    trans:{name:"Transmutation", c:"var(--trans)", sets:"3–5 sæt × 4–6 reps", load:"ca. 75–85 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Den nye muskelmasse omsættes til styrke. Tungere hver uge, og assistanceøvelserne går fra 4 til 3 sæt."},
-    real:{name:"Realisering", c:"var(--real)", sets:"3–4 sæt × 2–4 reps", load:"ca. 85–90 % af 1RM", rpe:"RPE 8, 2 reps i reserve", focus:"Tungt og lav volumen. Tunge treere frem for singler skåner led og sener."},
+    akk:{name:"Opbygning", c:"var(--akk)", sets:"3–4 sæt × 8–12 reps", load:"ca. 65–75 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Muskelmasse og arbejdskapacitet. Volumen bygges op uge for uge."},
+    trans:{name:"Styrke", c:"var(--trans)", sets:"3–5 sæt × 4–6 reps", load:"ca. 75–85 % af 1RM", rpe:"RPE 7–8, 2–3 reps i reserve", focus:"Den nye muskelmasse omsættes til styrke. Tungere hver uge, og assistanceøvelserne går fra 4 til 3 sæt."},
+    real:{name:"Tungt", c:"var(--real)", sets:"3–4 sæt × 2–4 reps", load:"ca. 85–90 % af 1RM", rpe:"RPE 8, 2 reps i reserve", focus:"Tungt og lav volumen. Tunge treere frem for singler skåner led og sener."},
     deload:{name:"Deload", c:"var(--deload)", sets:"Halvdelen af sættene, samme reps", load:"ca. 60 % af 1RM", rpe:"RPE 5–6, let og hurtigt", focus:"Samme øvelser, halv volumen. Her henter kroppen de sidste ugers træning hjem."},
     test:{name:"Testuge", c:"var(--test)", sets:"Arbejd op til et tungt sæt à 3–5 reps", load:"Ud fra dagsform", rpe:"RPE 9, stop før teknikken knækker", focus:"Test hovedløftene og log resultatet under Testresultater. Resten af ugen holdes let."}
   };
@@ -333,7 +336,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     if(idx < 0 && selected===null){
       const s = parseDate(state.settings.start);
       el.style.setProperty("--phase", PH.trans.c);
-      el.innerHTML = `<p class="big">Snart i gang</p><p class="week">Planen starter ${fmtY(s)}</p><p class="dates">Første fase er Transmutation.</p>`;
+      el.innerHTML = `<p class="big">Snart i gang</p><p class="week">Planen starter ${fmtY(s)}</p><p class="dates">Første fase er Styrke.</p>`;
       return;
     }
     if(idx > 51){
@@ -685,7 +688,7 @@ summary{cursor:pointer;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
   if(!window.claude) setStatus(loadInfo || "Ingen gemte data fundet");
 
   // Versionstjek, kun på GitHub Pages: viser en opdater-knap, når en nyere fil ligger online
-  const VERSION = "2026-10-29-9";
+  const VERSION = "2026-10-29-10";
   function checkUpdate(){
     if(!/github\.io$/.test(location.hostname) || document.getElementById("upd")) return;
     fetch(location.pathname, {cache:"no-store"}).then(r=>r.text()).then(t=>{
